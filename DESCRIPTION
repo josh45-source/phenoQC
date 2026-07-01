@@ -34,8 +34,7 @@ Imports:
     tidyr (>= 1.3.0),
     tidyselect (>= 1.2.0),
     utils
-Suggests: 
-    brapiR2,
+Suggests:
     knitr,
     lme4,
     patchwork,
