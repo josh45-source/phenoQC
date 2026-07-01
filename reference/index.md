@@ -1,0 +1,82 @@
+# Package index
+
+## Main Wrapper
+
+Run the full QC pipeline with one function call.
+
+- [`phenoqc()`](https://josh45-source.github.io/phenoQC/reference/phenoqc.md)
+  : Run Complete Phenotypic Quality Control
+- [`print(`*`<phenoqc_result>`*`)`](https://josh45-source.github.io/phenoQC/reference/print.phenoqc_result.md)
+  : Print a phenoQC Result
+- [`summary(`*`<phenoqc_result>`*`)`](https://josh45-source.github.io/phenoQC/reference/summary.phenoqc_result.md)
+  : Summarise a phenoQC Result
+- [`qc_report()`](https://josh45-source.github.io/phenoQC/reference/qc_report.md)
+  : Generate an HTML Quality Control Report
+
+## Trial Structure Validation
+
+Check data integrity before analysis.
+
+- [`qc_validate_structure()`](https://josh45-source.github.io/phenoQC/reference/qc_validate_structure.md)
+  : Validate Trial Structure
+- [`qc_check_duplicates()`](https://josh45-source.github.io/phenoQC/reference/qc_check_duplicates.md)
+  : Check for Duplicate Plot Coordinates
+- [`qc_check_missing_plots()`](https://josh45-source.github.io/phenoQC/reference/qc_check_missing_plots.md)
+  : Check for Missing Plot Positions
+- [`qc_check_trait_types()`](https://josh45-source.github.io/phenoQC/reference/qc_check_trait_types.md)
+  : Check Trait Column Types
+- [`qc_check_replication()`](https://josh45-source.github.io/phenoQC/reference/qc_check_replication.md)
+  : Check Replication Balance
+- [`qc_check_controls()`](https://josh45-source.github.io/phenoQC/reference/qc_check_controls.md)
+  : Check Control/Check Genotype Distribution
+
+## Outlier Detection
+
+Statistical and spatial outlier detection.
+
+- [`qc_outliers_statistical()`](https://josh45-source.github.io/phenoQC/reference/qc_outliers_statistical.md)
+  : Detect Statistical Outliers
+- [`qc_outliers_spatial()`](https://josh45-source.github.io/phenoQC/reference/qc_outliers_spatial.md)
+  : Detect Spatial Outliers
+- [`qc_outliers_by_group()`](https://josh45-source.github.io/phenoQC/reference/qc_outliers_by_group.md)
+  : Detect Outliers Within Groups
+- [`qc_flag_outliers()`](https://josh45-source.github.io/phenoQC/reference/qc_flag_outliers.md)
+  : Flag Outliers Using Multiple Methods
+- [`qc_plot_outliers()`](https://josh45-source.github.io/phenoQC/reference/qc_plot_outliers.md)
+  : Plot Outliers on Field Layout
+
+## Spatial Diagnostics
+
+Detect and visualise spatial trends in field data.
+
+- [`qc_spatial_trend()`](https://josh45-source.github.io/phenoQC/reference/qc_spatial_trend.md)
+  : Detect and Extract Spatial Trends
+- [`qc_plot_spatial()`](https://josh45-source.github.io/phenoQC/reference/qc_plot_spatial.md)
+  : Plot Spatial Field Heatmap
+- [`qc_spatial_autocorrelation()`](https://josh45-source.github.io/phenoQC/reference/qc_spatial_autocorrelation.md)
+  : Test Spatial Autocorrelation (Moran's I)
+
+## Missing Data
+
+Analyse and impute missing values.
+
+- [`qc_missing_summary()`](https://josh45-source.github.io/phenoQC/reference/qc_missing_summary.md)
+  : Summarise Missing Data
+- [`qc_missing_plot()`](https://josh45-source.github.io/phenoQC/reference/qc_missing_plot.md)
+  : Visualise Missing Data Patterns
+- [`qc_impute_spatial()`](https://josh45-source.github.io/phenoQC/reference/qc_impute_spatial.md)
+  : Impute Missing Values Using Spatial Neighbors
+
+## Utilities
+
+Helper functions.
+
+- [`detect_trait_cols()`](https://josh45-source.github.io/phenoQC/reference/detect_trait_cols.md)
+  : Auto-detect Numeric Trait Columns
+
+## Data
+
+Built-in example datasets.
+
+- [`example_trial`](https://josh45-source.github.io/phenoQC/reference/example_trial.md)
+  : Example Field Trial Dataset

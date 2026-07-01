@@ -1,0 +1,228 @@
+# Getting Started with phenoQC
+
+``` r
+
+library(phenoQC)
+```
+
+## Introduction
+
+phenoQC provides automated, reproducible quality control for phenotypic
+data from plant breeding field trials. This vignette walks through a
+typical QC session on the bundled `example_trial` dataset: a simulated
+197-plot trial with a handful of deliberate data quality issues baked in
+(duplicate plot coordinates, missing values, an extreme yield outlier,
+an unreplicated genotype, and a spatial gradient in plant height).
+
+## Loading the example data
+
+``` r
+
+data(example_trial)
+dim(example_trial)
+#> [1] 197   8
+
+head(example_trial)
+#>   row col rep block genotype yield plant_height days_to_flower
+#> 1   1   1   1     1   CHECK1  5.39         83.8             67
+#> 2   1   2   1     1     G037  4.84         83.3             66
+#> 3   1   3   1     1     G001  4.26         81.9             64
+#> 4   1   4   1     1     G025  4.85         85.3             64
+#> 5   1   5   1     1     G010  4.06         82.6             62
+#> 6   1   5   1     1     G036  5.91         92.3             69
+```
+
+Notice rows 5 and 6 already show one of the injected issues: they share
+the same `row`/`col` position (1, 5).
+
+## Auto-detecting trait columns
+
+Rather than typing out trait names by hand,
+[`detect_trait_cols()`](https://josh45-source.github.io/phenoQC/reference/detect_trait_cols.md)
+inspects the numeric columns and excludes common structural fields like
+`row`, `col`, `rep`, and `block`:
+
+``` r
+
+trait_cols <- detect_trait_cols(example_trial)
+trait_cols
+#> [1] "yield"          "plant_height"   "days_to_flower"
+```
+
+## Running the full QC pipeline
+
+[`phenoqc()`](https://josh45-source.github.io/phenoQC/reference/phenoqc.md)
+is the main entry point. It runs structure validation, missing data
+analysis, outlier detection (IQR + spatial by default), and spatial
+trend diagnostics in one call:
+
+``` r
+
+result <- phenoqc(example_trial, trait_cols = trait_cols)
+#> ── phenoQC: Phenotypic Data Quality Control ──────────────────────────────
+#>
+#> ── Step 1: Validating trial structure ──
+#>
+#> ! 3 issue(s) found in trial structure.
+#>
+#> ── Step 2: Analysing missing data ──
+#>
+#> ℹ 5 missing value(s) across 3 trait(s).
+#>
+#> ── Step 3: Detecting outliers ──
+#>
+#> ℹ 5 outlier(s) flagged.
+#>
+#> ── Step 4: Checking spatial trends ──
+#>
+#> ! 1 trait(s) show spatial trend.
+#>
+#> ── QC Complete ──
+#>
+#> ✔ Use `summary()` for an overview or `qc_report()` to generate an HTML
+#>   report.
+```
+
+The result is a `phenoqc_result` object with a
+[`print()`](https://rdrr.io/r/base/print.html) method for a quick
+overview:
+
+``` r
+
+result
+#>
+#> ── phenoQC Result
+#> • Observations: 197
+#> • Traits: yield, plant_height, days_to_flower
+#> • Outliers: 6 total flagged
+#> • Missing: 5 total
+#> • Spatial: 1 trait(s) with trend
+```
+
+### Summary output
+
+[`summary()`](https://rdrr.io/r/base/summary.html) returns a per-trait
+overview tibble:
+
+``` r
+
+summary(result)
+#> # A tibble: 3 × 7
+#>   trait          n_obs n_missing n_outliers spatial_trend mean_raw sd_raw
+#>   <chr>          <int>     <int>      <int> <lgl>            <dbl>  <dbl>
+#> 1 yield            194         3          1 FALSE             5.02   1.26
+#> 2 plant_height     195         2          1 TRUE             87.9    6.61
+#> 3 days_to_flower   197         0          4 FALSE            64.7    2.42
+```
+
+`plant_height` is flagged with `spatial_trend = TRUE` and shows one
+outlier even though its IQR-only outlier count is zero – that’s the
+combined IQR + spatial flag at work, covered in more depth in the
+[`vignette("spatial-analysis")`](https://josh45-source.github.io/phenoQC/articles/spatial-analysis.md)
+article.
+
+The full result also exposes each intermediate table individually:
+
+``` r
+
+result$validation
+#> # A tibble: 4 × 4
+#>   check                      status n_issues details
+#>   <chr>                      <chr>     <int> <glue>
+#> 1 Duplicate plot coordinates fail          2 2 duplicate position(s) detected
+#> 2 Missing plot positions     warn          4 4 position(s) missing from grid
+#> 3 Trait column types         pass          0 All trait columns are numeric
+#> 4 Replication balance        warn          1 1 genotype(s) with unequal replication
+
+result$missing
+#> # A tibble: 3 × 4
+#>   trait          n_total n_missing pct_missing
+#>   <chr>            <int>     <int>       <dbl>
+#> 1 yield              197         3         1.5
+#> 2 plant_height       197         2         1
+#> 3 days_to_flower     197         0         0
+```
+
+## Digging into individual checks
+
+Each step of
+[`phenoqc()`](https://josh45-source.github.io/phenoQC/reference/phenoqc.md)
+is also available as a standalone function, useful for interactive
+exploration or building a custom pipeline.
+
+### Duplicate plot coordinates
+
+``` r
+
+qc_check_duplicates(example_trial)
+#> # A tibble: 2 × 8
+#>     row   col   rep block genotype yield plant_height days_to_flower
+#>   <int> <int> <int> <int> <chr>    <dbl>        <dbl>          <int>
+#> 1     1     5     1     1 G010      4.06         82.6             62
+#> 2     1     5     1     1 G036      5.91         92.3             69
+```
+
+### Statistical (IQR) outliers
+
+``` r
+
+yield_out <- qc_outliers_statistical(example_trial, "yield", method = "iqr")
+attr(yield_out, "outlier_summary")
+#> # A tibble: 1 × 6
+#>   trait method threshold n_total n_outliers pct_outliers
+#>   <chr> <chr>      <dbl>   <int>      <int>        <dbl>
+#> 1 yield iqr          1.5     194          1          0.5
+
+yield_out[yield_out$yield_outlier, c("row", "col", "genotype", "yield", "yield_zscore")]
+#>    row col genotype yield yield_zscore
+#> 50   5  10     G009  18.5       10.731
+```
+
+That’s the injected extreme yield value (18.5 t/ha against a trial mean
+around 5 t/ha) – easily caught by a simple IQR rule.
+
+### Spatial outliers
+
+``` r
+
+yield_spatial <- qc_outliers_spatial(example_trial, "yield")
+yield_spatial[
+  yield_spatial$yield_spatial_outlier,
+  c("row", "col", "genotype", "yield", "yield_spatial_residual")
+]
+#>    row col genotype yield yield_spatial_residual
+#> 50   5  10     G009  18.5                    13.6
+```
+
+The same plot is flagged spatially too, with a large positive residual
+relative to its field neighbours.
+
+### Plotting outliers on the field layout
+
+``` r
+
+qc_plot_outliers(qc_flag_outliers(example_trial, "yield"), "yield")
+```
+
+[`qc_plot_outliers()`](https://josh45-source.github.io/phenoQC/reference/qc_plot_outliers.md)
+draws a field heatmap of the raw trait values and overlays an “X” marker
+on any plot flagged by
+[`qc_flag_outliers()`](https://josh45-source.github.io/phenoQC/reference/qc_flag_outliers.md).
+
+## Generating an HTML report
+
+Once you’re happy with the QC run,
+[`qc_report()`](https://josh45-source.github.io/phenoQC/reference/qc_report.md)
+renders everything – structure checks, missing data plots, outlier
+summaries, field heatmaps, and spatial diagnostics – into a single HTML
+report:
+
+``` r
+
+qc_report(result, output_file = "example_trial_qc.html", open = FALSE)
+#> ℹ Rendering QC report to 'example_trial_qc.html'...
+#> ✔ Report saved to 'example_trial_qc.html'
+```
+
+Set `open = TRUE` (the default in interactive sessions) to have the
+report open automatically in your browser.
