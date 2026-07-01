@@ -1,0 +1,66 @@
+url: https://josh45-source.github.io/phenoQC/
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: "Main Wrapper"
+    desc: Run the full QC pipeline with one function call.
+    contents:
+      - phenoqc
+      - print.phenoqc_result
+      - summary.phenoqc_result
+      - qc_report
+
+  - title: "Trial Structure Validation"
+    desc: Check data integrity before analysis.
+    contents:
+      - qc_validate_structure
+      - qc_check_duplicates
+      - qc_check_missing_plots
+      - qc_check_trait_types
+      - qc_check_replication
+      - qc_check_controls
+
+  - title: "Outlier Detection"
+    desc: Statistical and spatial outlier detection.
+    contents:
+      - qc_outliers_statistical
+      - qc_outliers_spatial
+      - qc_outliers_by_group
+      - qc_flag_outliers
+      - qc_plot_outliers
+
+  - title: "Spatial Diagnostics"
+    desc: Detect and visualise spatial trends in field data.
+    contents:
+      - qc_spatial_trend
+      - qc_plot_spatial
+      - qc_spatial_autocorrelation
+
+  - title: "Missing Data"
+    desc: Analyse and impute missing values.
+    contents:
+      - qc_missing_summary
+      - qc_missing_plot
+      - qc_impute_spatial
+
+  - title: "Utilities"
+    desc: Helper functions.
+    contents:
+      - detect_trait_cols
+
+  - title: "Data"
+    desc: Built-in example datasets.
+    contents:
+      - example_trial
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    github:
+      icon: fa-github
+      href: https://github.com/josh45-source/phenoQC
+      aria-label: GitHub

@@ -1,0 +1,49 @@
+Package: phenoQC
+Title: Automated Phenotypic Data Quality Control for Plant Breeding Trials
+Version: 0.1.0
+Authors@R: 
+    person("Joash Joshua", "Ayo", , "joash.ayo@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0000-0000-0000"))
+Description: Provides automated, reproducible quality control for phenotypic 
+    data from plant breeding field trials. Includes trial structure validation 
+    (duplicate plots, missing entries, replication balance), statistical and 
+    spatial outlier detection, spatial trend diagnostics, missing data analysis 
+    with spatial imputation, and automated HTML QC report generation. All 
+    functions are pipe-friendly and non-interactive, designed for scripting 
+    and batch processing. Integrates seamlessly with 'brapiR2' for end-to-end 
+    breeding data pipelines.
+License: MIT + file LICENSE
+URL: https://github.com/josh45-source/phenoQC, https://josh45-source.github.io/phenoQC/
+BugReports: https://github.com/josh45-source/phenoQC/issues
+Depends:
+    R (>= 4.1.0)
+Encoding: UTF-8
+Language: en-GB
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+LazyData: true
+Imports: 
+    cli (>= 3.6.0),
+    dplyr (>= 1.1.0),
+    ggplot2 (>= 3.4.0),
+    glue (>= 1.6.0),
+    purrr (>= 1.0.0),
+    rlang (>= 1.1.0),
+    stats,
+    tibble (>= 3.2.0),
+    tidyr (>= 1.3.0),
+    tidyselect (>= 1.2.0),
+    utils
+Suggests: 
+    brapiR2,
+    knitr,
+    lme4,
+    patchwork,
+    rmarkdown,
+    sf,
+    SpATS,
+    testthat (>= 3.0.0),
+    viridis,
+    withr
+Config/testthat/edition: 3
+VignetteBuilder: knitr

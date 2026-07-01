@@ -1,0 +1,8 @@
+bibentry(
+  bibtype = "Manual",
+  title   = "phenoQC: Automated Phenotypic Data Quality Control for Plant Breeding Trials",
+  author  = person("Joash Joshua", "Ayo"),
+  year    = "2026",
+  url     = "https://github.com/josh45-source/phenoQC",
+  note    = "R package version 0.1.0"
+)
