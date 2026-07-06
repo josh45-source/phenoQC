@@ -27,6 +27,55 @@ test_that("qc_check_duplicates returns empty for clean data", {
   expect_equal(nrow(dups), 0)
 })
 
+test_that("qc_check_duplicates does not flag a grid reused across environments", {
+  # Same 5x4 physical layout repeated for two environments: row/col repeat
+  # across env, but within each env every (row, col) is still unique.
+  one_env <- make_test_data()
+  d <- rbind(
+    cbind(env = "env1", one_env),
+    cbind(env = "env2", one_env)
+  )
+
+  dups <- qc_check_duplicates(d)
+  expect_equal(nrow(dups), 0)
+})
+
+test_that("qc_check_duplicates still finds a true duplicate within one environment", {
+  one_env <- make_test_data()
+  d <- rbind(
+    cbind(env = "env1", one_env),
+    cbind(env = "env2", one_env)
+  )
+  # Inject a genuine duplicate within env1 only
+  env1_idx <- which(d$env == "env1")
+  d$row[env1_idx[2]] <- d$row[env1_idx[1]]
+  d$col[env1_idx[2]] <- d$col[env1_idx[1]]
+
+  dups <- qc_check_duplicates(d)
+  expect_equal(nrow(dups), 2)
+  expect_true(all(dups$env == "env1"))
+})
+
+test_that("qc_check_duplicates honours an explicit group_cols argument", {
+  d <- make_test_data()
+  # rep already distinguishes two blocks; injecting a duplicate that only
+  # collides across reps should not be flagged when grouping by rep.
+  d$row[11] <- d$row[1]
+  d$col[11] <- d$col[1]
+
+  dups <- qc_check_duplicates(d, group_cols = "rep")
+  expect_equal(nrow(dups), 0)
+})
+
+test_that("qc_check_duplicates group_cols = character(0) forces a global check", {
+  d <- make_test_data()
+  d$row[2] <- d$row[1]
+  d$col[2] <- d$col[1]
+
+  dups <- qc_check_duplicates(d, group_cols = character(0))
+  expect_true(nrow(dups) >= 2)
+})
+
 test_that("qc_check_missing_plots detects gaps", {
   d <- make_test_data()
   # Remove a row to create a gap

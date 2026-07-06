@@ -4,7 +4,7 @@
 \alias{qc_check_duplicates}
 \title{Check for Duplicate Plot Coordinates}
 \usage{
-qc_check_duplicates(data, row_col = "row", col_col = "col")
+qc_check_duplicates(data, row_col = "row", col_col = "col", group_cols = NULL)
 }
 \arguments{
 \item{data}{A data frame.}
@@ -12,11 +12,21 @@ qc_check_duplicates(data, row_col = "row", col_col = "col")
 \item{row_col}{Character. Name of the row column.}
 
 \item{col_col}{Character. Name of the column column.}
+
+\item{group_cols}{Character vector or \code{NULL}. Columns that define separate
+trials/blocks (e.g. \code{c("env", "rep")}) within which \verb{(row, col)} must be
+unique. If \code{NULL} (default), auto-detects any of \code{env}, \code{rep},
+\code{location}, \code{site}, \code{trial}, \code{study} present in \code{data} (case
+insensitive) and uses those as the grouping columns. Pass
+\code{character(0)} to force a global (ungrouped) check.}
 }
 \value{
 A tibble of duplicated positions with all columns from the
 original data.
 }
 \description{
-Detects rows with identical (row, col) positions.
+Detects rows with identical (row, col) positions. In multi-environment
+or multi-replicate trials the same physical grid is normally reused for
+every environment/rep, so duplicates should be checked \emph{within} those
+groups rather than across the whole dataset.
 }

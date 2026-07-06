@@ -35,8 +35,10 @@ qc_validate_structure <- function(data,
                                   trait_cols = NULL) {
   results <- list()
 
-  # Check duplicates
-  dups <- qc_check_duplicates(data, row_col, col_col)
+  # Check duplicates, scoped within replicate by default so a field grid
+  # reused across reps/environments isn't mistaken for one giant duplicate.
+  dup_group_cols <- if (rep_col %in% names(data)) rep_col else NULL
+  dups <- qc_check_duplicates(data, row_col, col_col, group_cols = dup_group_cols)
   n_dups <- nrow(dups)
   results[[length(results) + 1]] <- tibble(
     check = "Duplicate plot coordinates",
@@ -101,24 +103,44 @@ qc_validate_structure <- function(data,
 
 #' Check for Duplicate Plot Coordinates
 #'
-#' Detects rows with identical (row, col) positions.
+#' Detects rows with identical (row, col) positions. In multi-environment
+#' or multi-replicate trials the same physical grid is normally reused for
+#' every environment/rep, so duplicates should be checked *within* those
+#' groups rather than across the whole dataset.
 #'
 #' @param data A data frame.
 #' @param row_col Character. Name of the row column.
 #' @param col_col Character. Name of the column column.
+#' @param group_cols Character vector or `NULL`. Columns that define separate
+#'   trials/blocks (e.g. `c("env", "rep")`) within which `(row, col)` must be
+#'   unique. If `NULL` (default), auto-detects any of `env`, `rep`,
+#'   `location`, `site`, `trial`, `study` present in `data` (case
+#'   insensitive) and uses those as the grouping columns. Pass
+#'   `character(0)` to force a global (ungrouped) check.
 #'
 #' @return A tibble of duplicated positions with all columns from the
 #'   original data.
 #'
 #' @export
-qc_check_duplicates <- function(data, row_col = "row", col_col = "col") {
+qc_check_duplicates <- function(data, row_col = "row", col_col = "col",
+                                group_cols = NULL) {
   check_col_exists(data, c(row_col, col_col))
 
+  if (is.null(group_cols)) {
+    candidates <- c("env", "rep", "location", "site", "trial", "study")
+    group_cols <- names(data)[tolower(names(data)) %in% candidates]
+    group_cols <- setdiff(group_cols, c(row_col, col_col))
+  } else {
+    check_col_exists(data, group_cols)
+  }
+
+  key_cols <- c(group_cols, row_col, col_col)
+
   data |>
-    group_by(.data[[row_col]], .data[[col_col]]) |>
+    group_by(across(all_of(key_cols))) |>
     filter(n() > 1) |>
     ungroup() |>
-    arrange(.data[[row_col]], .data[[col_col]])
+    arrange(across(all_of(key_cols)))
 }
 
 
